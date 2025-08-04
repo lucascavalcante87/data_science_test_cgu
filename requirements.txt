@@ -1,11 +1,7 @@
-# requirements.txt (install these with pip install -r requirements.txt)
 fastapi
 uvicorn
-pydantic
-PyPDF2
 sentence-transformers
 faiss-cpu
-rank_bm25
 transformers
 torch
 numpy
