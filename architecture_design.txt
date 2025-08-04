@@ -1,39 +1,29 @@
-+-------------------------+     +-------------------------------------+
-| Client (e.g., Web/App)  | --> | API Gateway / Load Balancer         |
-|                         |     | (e.g., AWS ALB)                     |
-+-------------------------+     +-------------------------------------+
-                                              |
-                                              v
-                           +---------------------------------------------+
-                           | FastAPI Instances (Containerized in        |
-                           | Docker/K8s Pods, Auto-scaled)              |
-                           |   - Async Endpoints                        |
-                           |   - Rate Limiting (e.g., slowapi)          |
-                           +---------------------------------------------+
-                                              |
-                                              v
-                           +---------------------------------------------+
-                           | Model Serving (e.g., HuggingFace          |
-                           | Inference Endpoints or Triton Server)      |
-                           |   - Embedding: SentenceTransformer         |
-                           |   - LLM: GPT-2 (prod: Larger model via API)|
-                           +---------------------------------------------+
-                                              |
-                                              v
-                           +---------------------------------------------+
-                           | Vector DB (e.g., Pinecone Cluster,        |
-                           | Sharded/Replicated)                        |
-                           |   - FAISS for local, but scaled DB for prod|
-                           +---------------------------------------------+
-                                              |
-                                              v
-                           +---------------------------------------------+
-                           | Storage (e.g., S3 for PDFs, Redis for     |
-                           | caching)                                   |
-                           +---------------------------------------------+
-                                              |
-                                              v
-                           +---------------------------------------------+
-                           | Monitoring (Prometheus/Grafana) +          |
-                           | Logging (ELK Stack)                        |
-                           +---------------------------------------------+
+Arquitetura de Produção: Evolução do Protótipo para Microservices Isolados
+
+Nota: O protótipo é simples (tudo em um app.py), mas em produção adicionamos microservices para isolamento, escalabilidade e manutenção.
+Cada microservice roda independentemente, comunicando via API ou message queue (ex.: RabbitMQ).
+
++---------------------+     +---------------------+     +---------------------+
+|                     |     |                     |     |                     |
+|  Microservice 1:    |     |  Microservice 2:    |     |  Microservice 3:    |
+|  Ingestão de Docs   |<--->|  RAG (Retrieval     |<--->|  Classificação      |
+|  (Process Documents)|     |  Augmented Gen)     |     | (Sentiment Analysis)|
+|  - Sentence-Transf. |     |  - FAISS Vector DB  |     |  - DistilBERT Model |
+|  - Upload/Process   |     |  - GPT-2 Generation |     |  - Output Results   |
+|                     |     |                     |     |                     |
++---------------------+     +---------------------+     +---------------------+
+
+         ^                          ^                          ^
+         |                          |                          |
+         +--------------------------+--------------------------+
+                                    |
+                                    v
++-----------------------------------------+
+|  API Gateway (FastAPI)                  |
+|  - Endpoints: /process, /rag, /classify |
++-----------------------------------------+
+
+Componentes Adicionais em Produção:
+- Banco de Dados: Para persistência (ex.: PostgreSQL ou MongoDB).
+- Orquestração: Kubernetes para deploy de microservices.
+- Segurança: Isolamento para evitar falhas em cascata.
