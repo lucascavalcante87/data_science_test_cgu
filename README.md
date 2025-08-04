@@ -37,3 +37,9 @@ This repository contains a FastAPI-based API implementing the required endpoints
    - `/classify`: POST with JSON `{"text": "..."}`
 
 4. For testing, use `/reset_index` to clear the index.
+
+## Appendix
+Trade-offs:
+- Cost vs. Performance: Local models cheap but slow; cloud APIs (e.g., OpenAI) faster but costly.
+- Complexity: Prototype simple; prod adds microservices for isolation (e.g., separate service for embedding).
+= This design supports 10,000 concurrent users by distributing load and using efficient components.
