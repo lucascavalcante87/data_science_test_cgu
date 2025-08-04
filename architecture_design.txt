@@ -18,10 +18,10 @@ Nota: O protótipo é simples (tudo em um app.py), mas em produção adicionamos
          |                          |                          |
          v                          v                          v
 
-+-----------------------------------------+
-|  API Gateway (FastAPI)                  |
-|  - Endpoints: /process, /rag, /classify |
-+-----------------------------------------+
+               +-----------------------------------------+
+               |  API Gateway (FastAPI)                  |
+               |  - Endpoints: /process, /rag, /classify |
+               +-----------------------------------------+
 
 Componentes Adicionais em Produção:
 - Banco de Dados: Para persistência (ex.: PostgreSQL ou MongoDB para metadados e resultados).
