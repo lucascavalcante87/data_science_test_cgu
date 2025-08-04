@@ -6,9 +6,9 @@ Nota: O protótipo é simples (tudo em um app.py), mas em produção adicionamos
 |                     |     |                     |     |                     |
 |  Microservice 1:    |     |  Microservice 2:    |     |  Microservice 3:    |
 |  Ingestão de Docs   |<--->|  RAG (Retrieval     |<--->|  Classificação      |
-|  (Process Documents)|     |  Augmented Gen)     |     |  (Sentiment Analysis)|
+|  (Process Documents)|     |  Augmented Gen)     |     | (Sentiment Analysis)|
 |  - Sentence-Transf. |     |  - FAISS Vector DB  |     |  - DistilBERT Model |
-|  - Upload/Process    |     |  - GPT-2 Generation |     |  - Output Results   |
+|  - Upload/Process   |     |  - GPT-2 Generation |     |  - Output Results   |
 |                     |     |                     |     |                     |
 +---------------------+     +---------------------+     +---------------------+
 
@@ -18,10 +18,10 @@ Nota: O protótipo é simples (tudo em um app.py), mas em produção adicionamos
          |                          |                          |
          v                          v                          v
 
-+---------------------+
-|  API Gateway (FastAPI) |
++-----------------------------------------+
+|  API Gateway (FastAPI)                  |
 |  - Endpoints: /process, /rag, /classify |
-+---------------------+
++-----------------------------------------+
 
 Componentes Adicionais em Produção:
 - Banco de Dados: Para persistência (ex.: PostgreSQL ou MongoDB para metadados e resultados).
