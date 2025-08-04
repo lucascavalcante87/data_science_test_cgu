@@ -39,7 +39,13 @@ This repository contains a FastAPI-based API implementing the required endpoints
 4. For testing, use `/reset_index` to clear the index.
 
 ## Appendix
-Trade-offs:
+1. Explanation
+- Scalability: Horizontal scaling via Kubernetes (auto-scale pods based on CPU/load). Use serverless (e.g., AWS Lambda) for low-traffic endpoints. Vector DB like Pinecone handles sharding for 10k users. Cache frequent queries in Redis to reduce DB hits.
+- Performance: Async FastAPI for I/O-bound ops. GPU for embeddings/LLM if needed. Batch processing for uploads. Target <500ms response time; optimize with top-k retrieval limits.
+A- vailability: Deploy in multi-AZ (e.g., AWS regions) with replicas. Health checks and circuit breakers (e.g., resilience4j). Uptime goal: 99.99% via rolling updates.
+- Security: API keys/JWT auth (add via fastapi-security). HTTPS enforced. Input validation/sanitization to prevent injection. Data encryption (TLS for transit, at-rest in DB). Rate limiting to prevent DDoS. No sensitive data stored; anonymize metadata. 
+
+2. Trade-offs:
 - Cost vs. Performance: Local models cheap but slow; cloud APIs (e.g., OpenAI) faster but costly.
 - Complexity: Prototype simple; prod adds microservices for isolation (e.g., separate service for embedding).
 = This design supports 10,000 concurrent users by distributing load and using efficient components.
