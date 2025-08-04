@@ -1,51 +1,61 @@
-<img width="476" height="327" alt="image" src="https://github.com/user-attachments/assets/fc18bdde-0f8e-465c-a8a0-eadf1fba1121" /># Text Files with LLM
+# Análise de Sentimento em Arquivos de Texto
 
-## Overview
-This repository contains a FastAPI-based API implementing the required endpoints for document processing, naive-RAG, and text classification. The solution is designed as a prototype that works locally but includes architectural considerations for scaling to 10,000 concurrent users.
+Esta é uma API para análise de sentimento em arquivos de texto, utilizando técnicas de embeddings, RAG (Retrieval-Augmented Generation) e classificação.
 
-## Technical Choices and Justifications
+## Configuração e Execução
 
-- **Embedding Model**: all-MiniLM-L6-v2 from sentence-transformers. Chosen for its efficiency, small size (fast inference), and good performance on semantic similarity tasks. Trade-off: Not as accurate as larger models like MPNet, but suitable for a prototype to reduce latency and resource usage.
+1. Clone o repositório:
+   ```
+   git clone https://github.com/lucascavalcante87/text_files_sentiment_analysis.git
+   cd text_files_sentiment_analysis
+   ```
 
-- **Vector Database**: FAISS (in-memory for demo). Justified for its speed in similarity search and ease of integration. For production, recommend switching to Pinecone or Weaviate for managed, scalable vector storage. Trade-off: In-memory lacks persistence; production would use a persistent backend.
+2. Crie um ambiente virtual (opcional, mas recomendado):
+   ```
+   python -m venv venv
+   source venv/bin/activate  # No Windows: venv\Scripts\activate
+   ```
 
-- **LLM/SLM for Generation and Classification**:
-  - **Generation (RAG)**: GPT-2 (small model from HuggingFace). Chosen for local execution without API keys, fast loading. Trade-off: Responses may not be as coherent as larger models (e.g., Llama-2); in prod, use Grok API or similar for better quality.
-  - **Classification**: DistilBERT fine-tuned on SST-2 for sentiment analysis. Efficient SLM, provides logits for logprobs. Justified for speed and accuracy on binary sentiment. Trade-off: Binary (POSITIVE/NEGATIVE); for multi-class, fine-tune further.
+3. Instale as dependências:
+   ```
+   pip install -r requirements.txt
+   ```
 
-- **Chunking**: Custom overlap-based chunking. Configurable for flexibility. Trade-off: Simple character-based; could use semantic chunking (e.g., via langchain) for better quality but adds complexity.
+4. Execute a aplicação:
+   ```
+   python app.py
+   ```
 
-- **Reranking**: BM25 for keyword-based rerank. Complements semantic search by handling lexical matches. Optional to allow trade-off between speed (no rerank) and precision.
+A API estará disponível em `http://localhost:8000`. Use ferramentas como Postman ou curl para testar os endpoints.
 
-- **Other**: PyPDF2 for PDF extraction (reliable, lightweight). Transformers for models (standard ecosystem).
+## Endpoints
 
-## Challenges
+- **POST /process_documents**: Processa arquivos de texto enviados e armazena embeddings.
+  - Corpo: Multipart form com arquivos de texto.
+  - Resposta: Confirmação de processamento.
 
-- Handling large PDFs: Limited to memory; prod would use streaming.
-- Concurrency: FastAPI is async, but models are CPU-bound; use GPU acceleration.
-- Logprobs: Implemented via softmax on logits for transparency in classification decisions.
+- **POST /rag_query**: Realiza consulta RAG em documentos processados.
+  - Corpo: JSON com "query" (string).
+  - Resposta: Resposta gerada com contexto recuperado.
 
-## Setup and Running
+- **POST /classify_sentiment**: Classifica o sentimento de um texto.
+  - Corpo: JSON com "text" (string).
+  - Resposta: Sentimento (positivo, negativo) e pontuação.
 
-1. Install dependencies: `pip install -r requirements.txt`
+## Arquitetura
 
-2. Run the API: `python app.py`
+Para uma visão da arquitetura do sistema (focada na versão de produção com microservices para isolamento), consulte o arquivo [architecture_design.txt](architecture_design.txt). Ele descreve como o sistema pode evoluir para escalabilidade, com componentes isolados.
 
-3. Test endpoints using Postman or curl:
-   - `/process_documents`: POST with files (multipart/form-data), query params chunk_size, chunk_overlap.
-   - `/rag`: POST with JSON `{"question": "...", "use_rerank": true/false}`
-   - `/classify`: POST with JSON `{"text": "..."}`
+## Dependências Principais
 
-4. For testing, use `/reset_index` to clear the index.
+- FastAPI: Para a API web.
+- Sentence Transformers: Para embeddings.
+- FAISS: Para banco de vetores.
+- Transformers (Hugging Face): Para modelos de geração e classificação.
 
-## Appendix
-1. Explanation
-- Scalability: Horizontal scaling via Kubernetes (auto-scale pods based on CPU/load). Use serverless (e.g., AWS Lambda) for low-traffic endpoints. Vector DB like Pinecone handles sharding for 10k users. Cache frequent queries in Redis to reduce DB hits.
-- Performance: Async FastAPI for I/O-bound ops. GPU for embeddings/LLM if needed. Batch processing for uploads. Target <500ms response time; optimize with top-k retrieval limits.
-A- vailability: Deploy in multi-AZ (e.g., AWS regions) with replicas. Health checks and circuit breakers (e.g., resilience4j). Uptime goal: 99.99% via rolling updates.
-- Security: API keys/JWT auth (add via fastapi-security). HTTPS enforced. Input validation/sanitization to prevent injection. Data encryption (TLS for transit, at-rest in DB). Rate limiting to prevent DDoS. No sensitive data stored; anonymize metadata. 
+O código está modularizado em arquivos separados para facilitar a manutenção e evolução para produção.
 
-2. Trade-offs:
-- Cost vs. Performance: Local models cheap but slow; cloud APIs (e.g., OpenAI) faster but costly.
-- Complexity: Prototype simple; prod adds microservices for isolation (e.g., separate service for embedding).
-= This design supports 10,000 concurrent users by distributing load and using efficient components.
+## Licença
+
+MIT License.
+```
