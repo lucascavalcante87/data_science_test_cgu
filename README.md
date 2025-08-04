@@ -1,4 +1,4 @@
-# CGU Data Scientist Test Solution
+# CGU Slution
 
 ## Overview
 This repository contains a FastAPI-based API implementing the required endpoints for document processing, naive-RAG, and text classification. The solution is designed as a prototype that works locally but includes architectural considerations for scaling to 10,000 concurrent users.
