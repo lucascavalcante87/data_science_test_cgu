@@ -9,10 +9,10 @@ from classification import classify_sentiment
 
 app = FastAPI(title="Análise de Sentimento em Arquivos de Texto")
 
-# Variáveis globais (para protótipo; em prod, use injeção de dependências)
+# Variáveis globais
 embedding_model = get_embedding_model()
 classifier_model, tokenizer = get_classifier_model()
-vector_db = None  # Inicializado sob demanda
+vector_db = None
 
 @app.post("/process_documents")
 async def process_documents(files: List[UploadFile] = File(...)):
@@ -24,7 +24,6 @@ async def process_documents(files: List[UploadFile] = File(...)):
         content = await file.read()
         texts.append(process_text(content.decode('utf-8')))
     
-    # Cria ou atualiza o DB de vetores
     vector_db = create_vector_db(texts, embedding_model)
     return {"message": "Documentos processados com sucesso."}
 
@@ -42,3 +41,4 @@ async def perform_classification(text: str):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
