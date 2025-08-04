@@ -9,7 +9,6 @@ from classification import classify_sentiment
 
 app = FastAPI(title="Análise de Sentimento em Arquivos de Texto")
 
-# Variáveis globais
 embedding_model = get_embedding_model()
 classifier_model, tokenizer = get_classifier_model()
 vector_db = None
@@ -41,4 +40,5 @@ async def perform_classification(text: str):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
