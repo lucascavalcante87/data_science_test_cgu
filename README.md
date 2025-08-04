@@ -40,7 +40,7 @@ A API estará disponível em `http://localhost:8000`. Use ferramentas como Postm
 
 - **POST /classify_sentiment**: Classifica o sentimento de um texto.
   - Corpo: JSON com "text" (string).
-  - Resposta: Sentimento (positivo, negativo, neutro) e pontuação.
+  - Resposta: Sentimento (positivo, negativo) e pontuação.
 
 ## Arquitetura
 
