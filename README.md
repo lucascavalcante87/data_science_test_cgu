@@ -1,72 +1,39 @@
-# Teste Cientista de Dados CGU
+# CGU Data Scientist Test Solution
 
-## Objetivo
-Este teste prático tem como objetivo avaliar suas habilidades técnicas nos requisitos da vaga, bem como compreender seu processo de tomada de decisões técnicas e análise de trade-offs.
+## Overview
+This repository contains a FastAPI-based API implementing the required endpoints for document processing, naive-RAG, and text classification. The solution is designed as a prototype that works locally but includes architectural considerations for scaling to 10,000 concurrent users.
 
-## Descrição do Desafio
-Você deve construir uma API utilizando **FastAPI** com três endpoints principais, conforme especificado abaixo.
+## Technical Choices and Justifications
 
-## Especificações dos Endpoints
+- **Embedding Model**: all-MiniLM-L6-v2 from sentence-transformers. Chosen for its efficiency, small size (fast inference), and good performance on semantic similarity tasks. Trade-off: Not as accurate as larger models like MPNet, but suitable for a prototype to reduce latency and resource usage.
 
-### 1. Processamento de Documentos
-**Endpoint**: Upload → Chunknização → Embedding → Base Vetorial  
-**Funcionalidades**:
-- Aceitar upload de um ou mais arquivos PDF
-- Receber parâmetros configuráveis para chunknização
-- Gerar embeddings a partir dos chunks processados
-- Armazenar em uma base vetorial incluindo metadados relevantes
+- **Vector Database**: FAISS (in-memory for demo). Justified for its speed in similarity search and ease of integration. For production, recommend switching to Pinecone or Weaviate for managed, scalable vector storage. Trade-off: In-memory lacks persistence; production would use a persistent backend.
 
-### 2. Naive-RAG
-**Funcionalidades**:
-- Receber uma pergunta como input
-- Retornar uma resposta adequada baseada nos documentos indexados
-- Permitir ao usuário escolher se deseja aplicar reranking com BM25
+- **LLM/SLM for Generation and Classification**:
+  - **Generation (RAG)**: GPT-2 (small model from HuggingFace). Chosen for local execution without API keys, fast loading. Trade-off: Responses may not be as coherent as larger models (e.g., Llama-2); in prod, use Grok API or similar for better quality.
+  - **Classification**: DistilBERT fine-tuned on SST-2 for sentiment analysis. Efficient SLM, provides logits for logprobs. Justified for speed and accuracy on binary sentiment. Trade-off: Binary (POSITIVE/NEGATIVE); for multi-class, fine-tune further.
 
-### 3. Classificação de Texto
-**Endpoint**: Análise de Sentimentos ou Classificador  
-**Funcionalidades**:
-- Receber uma sentença como input
-- Classificar adequadamente utilizando LLM ou SLM
-- Preferencialmente, utilizar logprobs para fundamentar a classificação
+- **Chunking**: Custom overlap-based chunking. Configurable for flexibility. Trade-off: Simple character-based; could use semantic chunking (e.g., via langchain) for better quality but adds complexity.
 
-## Decisões Técnicas
-As seguintes escolhas são parte integrante da avaliação:
-- Modelo de embedding a ser utilizado
-- Banco vetorial para armazenamento
-- LLM/SLM para classificação e geração de respostas
+- **Reranking**: BM25 for keyword-based rerank. Complements semantic search by handling lexical matches. Optional to allow trade-off between speed (no rerank) and precision.
 
-*Outras decisões técnicas podem ser consideradas.*
+- **Other**: PyPDF2 for PDF extraction (reliable, lightweight). Transformers for models (standard ecosystem).
 
-## Requisitos de Arquitetura
-A API deve ser projetada para suportar até **10.000 usuários concorrentes**. Elabore um desenho detalhado da arquitetura considerando:
-- **Escalabilidade**
-- **Performance**
-- **Disponibilidade**
-- **Segurança**
+## Challenges
 
-### Segurança
-Proteger dados e informações sensíveis contra ameaças.
+- Handling large PDFs: Limited to memory; prod would use streaming.
+- Concurrency: FastAPI is async, but models are CPU-bound; use GPU acceleration.
+- Logprobs: Implemented via softmax on logits for transparency in classification decisions.
 
-### Disponibilidade
-Manter os serviços acessíveis com tempo de inatividade mínimo.
+## Setup and Running
 
-### Escalabilidade
-Garantir que o sistema possa lidar com o aumento de usuários e dados.
+1. Install dependencies: `pip install -r requirements.txt`
 
-## Entregráveis Obrigatórios
-1. **README.md** completo e bem documentado
-2. **Desenho da arquitetura** [diagrama + explicação]
-3. **Repositório Git** com o código da solução
+2. Run the API: `python app.py`
 
-## Apresentação da Solução
-A apresentação, de no máximo **15 minutos**, deve demonstrar seu raciocínio analítico, destacando:
-- As escolhas técnicas realizadas
-- Os desafios enfrentados
-- Como você avaliou diferentes opções para chegar à solução apresentada
+3. Test endpoints using Postman or curl:
+   - `/process_documents`: POST with files (multipart/form-data), query params chunk_size, chunk_overlap.
+   - `/rag`: POST with JSON `{"question": "...", "use_rerank": true/false}`
+   - `/classify`: POST with JSON `{"text": "..."}`
 
-## Observações
-- Não é necessário entregar o código completo funcional, pode ser um esboço das APIs e serviços
-- Não há restrição quanto ao modelo de LLM utilizado
-- Os documentos a analisar podem ser de qualquer tipo, contanto que não infrinjam os direitos autorais
-- Foque na qualidade da documentação e no design da solução
-- Justifique suas escolhas técnicas no README
+4. For testing, use `/reset_index` to clear the index.
