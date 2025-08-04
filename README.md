@@ -54,8 +54,4 @@ Para uma visão da arquitetura do sistema (focada na versão de produção com m
 - Transformers (Hugging Face): Para modelos de geração e classificação.
 
 O código está modularizado em arquivos separados para facilitar a manutenção e evolução para produção.
-
-## Licença
-
-MIT License.
 ```
